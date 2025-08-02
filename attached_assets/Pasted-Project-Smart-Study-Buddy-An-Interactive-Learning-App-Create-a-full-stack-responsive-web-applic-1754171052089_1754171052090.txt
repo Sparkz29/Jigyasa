@@ -1,0 +1,110 @@
+Project: Smart Study Buddy - An Interactive Learning App
+Create a full-stack, responsive web application named "Smart Study Buddy" that allows students to upload their educational materials (textbooks, workbooks) and interact with an AI to learn, quiz themselves, and get hints on specific topics.
+
+1. Core Functionality
+The application should have a primary chat-based interface. The user will first upload a document, and then all subsequent interactions (asking questions, starting quizzes, getting hints) will be powered by the content of that document.
+
+2. Technology Stack
+Frontend: A modern JavaScript framework like React with a clean, responsive UI library like Tailwind CSS.
+
+Backend: A Python framework like Flask or FastAPI.
+
+LLM Integration: The backend should be designed to use a locally running open-source LLM (e.g., a small Mistral or Llama model) or a free-tier LLM API. The implementation should be flexible enough to swap LLMs.
+
+Document Handling: Use libraries like PyMuPDF or pdfplumber for PDF text extraction.
+
+Vectorization (for RAG): Implement a simple, in-memory vector store or use a library like chromadb or faiss to handle document chunking and embedding for efficient retrieval-augmented generation (RAG).
+
+3. Frontend UI/UX Requirements
+Design a single-page application with the following components and a clean, minimalist layout:
+
+Header: A simple header with the title "Smart Study Buddy."
+
+Main Content Area: A central, vertically-scrollable container.
+
+Initial State: Show a prominent file upload area with a button to select a PDF file. Display a message like "Upload your textbook to get started."
+
+Post-Upload State: Replace the upload area with the chat interface.
+
+Chat History: A main scrolling area displaying all messages. User messages should be on the right, and AI responses on the left.
+
+File Information: A small, persistent display showing the name of the currently uploaded file.
+
+Chat Input: A text input box at the bottom for the user to type questions.
+
+Control Buttons: Include interactive buttons next to the chat input for specific actions:
+
+"Start Quiz" button.
+
+"Get Hint" button (only visible after a user asks a question and receives an initial response).
+
+"Show Answer" button (appears after "Get Hint" is clicked).
+
+4. Backend Functionality and Endpoints
+The backend should provide the following API endpoints:
+
+/api/upload (POST):
+
+Accepts a multipart/form-data request with a PDF file.
+
+Extracts text from the PDF.
+
+Chunks the text into manageable sections.
+
+Generates embeddings for each chunk and stores them in a local vector store.
+
+Returns a success message to the frontend.
+
+/api/chat (POST):
+
+Accepts a JSON payload with a query string and the conversation_history.
+
+Performs a similarity search in the vector store to find the most relevant document chunks based on the query.
+
+Constructs a prompt for the LLM using the user's query and the retrieved document chunks.
+
+Sends the prompt to the LLM and returns the LLM's text response.
+
+/api/quiz (POST):
+
+Accepts a JSON payload with a topic string.
+
+Retrieves relevant content for the topic from the vector store.
+
+Constructs a prompt to the LLM asking it to generate a 5-question multiple-choice quiz based on the retrieved content.
+
+Returns the quiz questions and correct answers in a structured JSON format.
+
+/api/hint (POST):
+
+Accepts a JSON payload with the user's question and the context from the uploaded document.
+
+Constructs a prompt for the LLM asking for a concise, conceptual hint, without giving away the full answer.
+
+Returns the hint text.
+
+/api/answer (POST):
+
+Accepts a JSON payload with the user's question and the context.
+
+Constructs a prompt to the LLM to provide a complete, detailed answer.
+
+Returns the full answer text.
+
+5. Detailed Logic and User Flow
+Initial Load: The user sees the file upload interface.
+
+File Upload: The user uploads a PDF. The frontend displays a loading spinner while the backend processes the file. Once complete, the chat interface appears.
+
+Chatting: The user can now ask general questions about the book (e.g., "What is the summary of Chapter 2?"). The app uses the /api/chat endpoint.
+
+Learning a Topic: The user can start a new topic by simply asking a question related to it (e.g., "Explain the process of photosynthesis."). The backend uses the RAG approach to find relevant content and answer.
+
+Quizzes: When the user clicks "Start Quiz," a modal or a new chat conversation begins, and the backend calls the /api/quiz endpoint for a quiz on the current or a user-specified topic.
+
+Hints: When the user asks a specific question (e.g., "What is the formula for kinetic energy?"), the initial response from the /api/chat endpoint should be a simple acknowledgment or a leading question. The UI should then display "Get Hint" and "Show Answer" buttons. Clicking "Get Hint" calls the /api/hint endpoint, and clicking "Show Answer" calls /api/answer. The hint should be a short, guiding piece of information, while the answer should be comprehensive.
+
+6. Bonus Considerations
+Error Handling: Implement robust error handling for file uploads, LLM failures, and API calls. Display user-friendly error messages.
+
+Styling: Use a modern color palette, spacing, and typography with Tailwind CSS to create a professional and appealing design. The UI must be fully responsive on desktop and mobile devices.
