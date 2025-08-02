@@ -42,14 +42,15 @@ The application uses a hybrid storage approach:
 The storage layer supports documents, chat messages, and quiz data with proper relationships and indexing.
 
 ## AI Integration Architecture
-The application integrates with OpenAI's services for AI capabilities:
+The application integrates with Google's Gemini API for AI capabilities:
 
-- **LLM**: OpenAI GPT-4o for chat responses and content generation
-- **Embeddings**: OpenAI text-embedding-3-small for document vectorization
+- **LLM**: Gemini 2.5 Flash and Pro models for chat responses and content generation
+- **Embeddings**: Gemini text-embedding-004 for document vectorization
 - **RAG Pipeline**: Custom retrieval-augmented generation using vector similarity search
 - **Context Management**: Conversation history tracking and context injection
+- **Free Tier**: Uses Google AI Studio's generous free tier (15 requests/minute)
 
-The AI service handles multiple interaction types including general chat, quiz generation, hints, and answer explanations.
+The AI service handles multiple interaction types including general chat, quiz generation, hints, and answer explanations. Updated on January 2025 to use Gemini instead of OpenAI for cost-effectiveness.
 
 ## Document Processing Pipeline
 The application implements a sophisticated document processing workflow:
@@ -62,7 +63,7 @@ The application implements a sophisticated document processing workflow:
 
 ## External Dependencies
 
-- **OpenAI API**: For LLM chat completions and text embeddings
+- **Google Gemini API**: For LLM chat completions and text embeddings (free tier)
 - **Neon Database**: PostgreSQL hosting service (configured but can fall back to other providers)
 - **PDF Processing**: pdf-parse library for extracting text from PDF documents
 - **Radix UI**: Comprehensive set of accessible UI components

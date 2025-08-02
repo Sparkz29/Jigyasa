@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { pdfProcessor } from "./services/pdf-processor";
 import { vectorStore } from "./services/vector-store";
-import { openaiService } from "./services/openai-service";
+import { geminiService } from "./services/gemini-service";
 import { chatRequestSchema, quizRequestSchema, hintRequestSchema, answerRequestSchema } from "@shared/schema";
 import multer from "multer";
 
@@ -75,8 +75,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const relevantChunks = await vectorStore.similaritySearch(documentId, query);
       const context = relevantChunks.map(chunk => chunk.content);
 
-      // Generate response using OpenAI
-      const response = await openaiService.chat(query, context, conversationHistory);
+      // Generate response using Gemini
+      const response = await geminiService.chat(query, context, conversationHistory);
 
       // Store chat messages
       await storage.createChatMessage({
@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const context = relevantChunks.map(chunk => chunk.content);
 
       // Generate quiz questions
-      const questions = await openaiService.generateQuiz(context, topic);
+      const questions = await geminiService.generateQuiz(context, topic);
 
       // Store quiz
       const quiz = await storage.createQuiz({
@@ -144,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const context = relevantChunks.map(chunk => chunk.content);
 
       // Generate hint
-      const hint = await openaiService.generateHint(question, context);
+      const hint = await geminiService.generateHint(question, context);
 
       res.json({ hint });
     } catch (error) {
@@ -163,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const context = relevantChunks.map(chunk => chunk.content);
 
       // Generate answer
-      const answer = await openaiService.generateAnswer(question, context);
+      const answer = await geminiService.generateAnswer(question, context);
 
       res.json({ answer });
     } catch (error) {

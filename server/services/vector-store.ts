@@ -1,8 +1,4 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "your-api-key-here",
-});
+import { geminiService } from './gemini-service';
 
 export interface VectorDocument {
   id: string;
@@ -33,16 +29,7 @@ export class VectorStore {
   }
 
   async generateEmbedding(text: string): Promise<number[]> {
-    try {
-      const response = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: text,
-      });
-      
-      return response.data[0].embedding;
-    } catch (error) {
-      throw new Error(`Failed to generate embedding: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    return await geminiService.generateEmbedding(text);
   }
 
   async similaritySearch(documentId: string, query: string, topK: number = 3): Promise<VectorDocument[]> {
