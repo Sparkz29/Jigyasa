@@ -1,10 +1,13 @@
 # Overview
 
-Smart Study Buddy is a full-stack interactive learning application that allows students to upload educational materials (PDFs) and interact with an AI-powered chat interface for learning, quizzing, and getting study assistance. The application uses advanced features like document processing, vector search, and AI-powered quiz generation to create a comprehensive learning experience.
+JIGYASA.AI is a pilot-ready AI Tutor Platform with dual interfaces for teachers and students. The platform features grade-adaptive learning, Socratic questioning methodology, and a safe "walled garden" knowledge base controlled by teachers. Teachers create virtual classrooms and manage curriculum materials, while students receive personalized AI tutoring based on approved content. Built with modern web technologies and powered by Google Gemini AI for cost-effective, scalable education solutions.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Platform name: JIGYASA.AI with subtitle "Artificial Intelligence that builds Real Intelligence"
+Design inspiration: SchoolAI.com for modern, safe learning environment aesthetics
+Key focus areas: Teacher control, student safety, grade-adaptive responses, Socratic questioning
 
 # System Architecture
 
@@ -32,25 +35,30 @@ The backend follows a Node.js/Express architecture with TypeScript:
 The server implements middleware for request logging, JSON parsing, and development-specific features like Vite integration for hot reloading.
 
 ## Data Storage Solutions
-The application uses a hybrid storage approach:
+The application uses a comprehensive PostgreSQL-based storage architecture:
 
-- **Database**: PostgreSQL configured via Drizzle ORM with schema-first approach
-- **In-Memory Storage**: Fallback MemStorage class for development/testing
-- **Vector Store**: Custom in-memory vector storage for document embeddings
-- **File Storage**: Temporary in-memory file processing (no persistent file storage)
+- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
+- **Authentication**: Replit OAuth integration with session-based authentication
+- **Multi-tenancy**: Role-based access control (Teachers, Students, Admin roles)
+- **Classroom System**: Teachers create classrooms with unique invite codes for student enrollment
+- **Document Management**: PDF upload and processing with classroom-scoped access controls
+- **Chat Persistence**: Conversation sessions and message history per classroom
+- **Vector Store**: Custom in-memory vector storage for document embeddings with classroom isolation
 
-The storage layer supports documents, chat messages, and quiz data with proper relationships and indexing.
+The storage layer implements proper foreign key relationships, cascading deletes, and indexing for optimal performance across the multi-user education platform.
 
 ## AI Integration Architecture
-The application integrates with Google's Gemini API for AI capabilities:
+The application integrates with Google's Gemini API for educational AI capabilities:
 
-- **LLM**: Gemini 2.5 Flash and Pro models for chat responses and content generation
+- **LLM**: Gemini 2.5 Flash and Pro models for grade-adaptive chat responses
 - **Embeddings**: Gemini text-embedding-004 for document vectorization
-- **RAG Pipeline**: Custom retrieval-augmented generation using vector similarity search
-- **Context Management**: Conversation history tracking and context injection
+- **RAG Pipeline**: Custom retrieval-augmented generation using classroom-specific vector stores
+- **Socratic Method**: AI prompts designed to ask guiding questions rather than provide direct answers
+- **Grade Adaptation**: Dynamic language complexity adjustment based on student grade levels (K-12)
+- **Safety Controls**: "Walled garden" approach using only teacher-approved curriculum materials
 - **Free Tier**: Uses Google AI Studio's generous free tier (15 requests/minute)
 
-The AI service handles multiple interaction types including general chat, quiz generation, hints, and answer explanations. Updated on January 2025 to use Gemini instead of OpenAI for cost-effectiveness.
+The AI service implements educational best practices with conversation history tracking and source citation for all responses. Updated January 2025 for multi-user education platform with role-based access control.
 
 ## Document Processing Pipeline
 The application implements a sophisticated document processing workflow:
