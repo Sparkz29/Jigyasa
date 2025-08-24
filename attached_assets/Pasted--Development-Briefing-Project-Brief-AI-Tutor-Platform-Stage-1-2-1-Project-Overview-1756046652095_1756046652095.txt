@@ -1,0 +1,97 @@
+# Development Briefing
+
+# Project Brief: AI Tutor Platform (Stage 1 & 2)
+
+## 1. Project Overview
+
+The goal of this project is to build a "Pilot-Ready" AI Tutor Platform. This platform will serve as a proof-of-concept to pitch to potential customers (schools and teachers). It must be a fully functional application that showcases our key unique selling propositions (USPs): grade-adaptive learning, Socratic questioning, and a safe, "walled garden" knowledge base controlled by teachers.
+
+**Stage 1** will use a third-party AI API (e.g., Google Gemini or OpenAI GPT) for the core AI logic to achieve speed to market.
+**Stage 2** will focus on replacing the third-party API with our own fine-tuned, in-house model to reduce costs, increase specialization, and prepare for scale.
+
+**Reference Materials:**
+
+- **Frontend Codebase:** You have been provided with a React application (`ai_tutor_frontend`) that serves as the starting point and visual reference for the UI.
+- **Backend Guide:** A detailed backend guide (`ai_tutor_backend_guide`) outlines the recommended architecture, database models, and API structure.
+
+## 2. Core Technology Stack
+
+The project should be built using the following modern and scalable technologies:
+
+- **Backend:** Python (with FastAPI framework)
+- **Frontend:** React (with Next.js framework)
+- **Database:** PostgreSQL
+- **Vector Database:** ChromaDB
+- **Cloud Provider:** Google Cloud Platform (GCP) or Amazon Web Services (AWS)
+
+## 3. Development Milestones & Tasks - STAGE 1
+
+### Milestone 1: Project Setup & Core Foundation
+
+**Goal:** Establish the project's infrastructure, database, and user authentication systems.
+
+| Task ID | Task Description | Acceptance Criteria |
+| --- | --- | --- |
+| **B-1.1** | **Backend Project Setup:** Initialize a new FastAPI project with a structured directory layout. | Project is created and a basic "hello world" endpoint is running. |
+| **F-1.1** | **Frontend Project Setup:** Initialize the project using the provided React codebase as the foundation. | The React app runs locally and connects to the backend. |
+| **D-1.1** | **Infrastructure Setup:** Provision core cloud services: server instances (e.g., Cloud Run), a managed PostgreSQL database, and a Git repository. | All required cloud services are active. The developer has access to the Git repository. |
+| **B-1.2** | **Database Schema:** Implement the database models for `Users` (with roles), `Conversations`, and `Messages` using SQLAlchemy, as per the backend guide. | Database tables are created and match the specification. |
+| **B-1.3** | **Authentication API:** Build the API endpoints for user registration and login (`/register`, `/login`). Implement JWT for secure sessions and Role-Based Access Control (RBAC) logic to differentiate between 'student' and 'teacher' roles. | A user can register, log in, and receive a JWT. API routes are protected. |
+| **F-1.2** | **Authentication UI:** Connect the frontend Login and Registration pages to the backend API. Implement session management to keep users logged in. | A user can sign up and log in through the UI. The app correctly redirects to the appropriate dashboard (student or teacher) based on the user's role. |
+
+### Milestone 2: Student Chat Functionality
+
+**Goal:** A student can log in and have a complete, AI-powered conversation that is saved and can be reviewed.
+
+| Task ID | Task Description | Acceptance Criteria |
+| --- | --- | --- |
+| **F-2.1** | **Chat UI Implementation:** Build out the student chat view based on the reference code, including the conversation list sidebar and the main message area. | The UI is fully interactive and visually polished. |
+| **B-2.1** | **Core Chat API:** Build the primary chat endpoint that receives a user's message. | The endpoint is functional and can receive requests. |
+| **B-2.2** | **LLM Integration:** Integrate the third-party LLM API (e.g., Gemini). The backend must construct a prompt that includes the student's `grade_level` and the conversation history. | The backend successfully gets a response from the LLM API. |
+| **B-2.3** | **Conversation History:** Implement the logic to save user and bot messages to the database. Build the API endpoints to list a user's past conversations and retrieve messages for a selected conversation. | All chats are saved. A student can click on a past chat in the UI and see the full message history. |
+
+### Milestone 3: Teacher Dashboard & "Walled Garden" (RAG)
+
+**Goal:** Implement the core USP by allowing teachers to upload their own curriculum, which the AI will use as its sole source of knowledge.
+
+| Task ID | Task Description | Acceptance Criteria |
+| --- | --- | --- |
+| **F-3.1** | **Teacher Dashboard UI:** Build the UI for the "Knowledge Base Management" section where teachers can upload and view their documents, based on the reference code. | The UI is functional and allows for file selection and viewing of an uploaded file list. |
+| **B-3.1** | **File Upload API:** Create a secure endpoint (teacher role only) that accepts file uploads (PDF, DOCX, TXT) and saves them to a cloud storage bucket. | A logged-in teacher can successfully upload a document. The file appears in cloud storage. |
+| **D-3.1** | **Vector DB Setup:** Set up and configure the ChromaDB vector database. | The database is running and accessible by the backend application. |
+| **B-3.2** | **Asynchronous Document Processor:** Create a background worker service that automatically processes uploaded files. This service must: 1. Extract text from the document. 2. Split text into chunks. 3. Generate vector embeddings for each chunk. 4. Store the embeddings and metadata (source filename) in ChromaDB. | When a teacher uploads a file, the content is automatically and successfully vectorized and stored in ChromaDB without blocking the API. |
+| **B-3.3** | **Upgrade Chat API for RAG:** This is a critical task. Modify the chat API to: 1. First, query ChromaDB to find context relevant to the student's question. 2. Construct a new, advanced prompt that includes this context. 3. Instruct the LLM to **answer only using the provided context** and to cite the source. | The AI's responses are now based on the uploaded documents. The chat response includes a source citation (e.g., "[Source: Chemistry-Notes.pdf]"). |
+
+### Milestone 4: Final Polish, Testing & Deployment
+
+**Goal:** Ensure the application is stable, bug-free, and ready for demonstration to pilot customers.
+
+| Task ID | Task Description | Acceptance Criteria |
+| --- | --- | --- |
+| **F-4.1** | **Rich Content Rendering:** Implement rendering for LaTeX (for math formulas) in the student chat view. | Mathematical equations sent by the AI are displayed correctly, not as raw text. |
+| **B-4.1** | **Prompt Engineering Refinement:** Dedicate time to testing and refining the system prompt to improve the AI's Socratic questioning ability. | The AI's tendency to ask guiding questions is noticeably improved and more consistent. |
+| **G-4.1** | **End-to-End Testing:** Conduct thorough testing of all user flows (student registration, chat, teacher login, file upload, etc.). | All major bugs are identified and fixed. The application is stable. |
+| **B-4.2** | **Error Handling & Logging:** Implement comprehensive error handling on the backend and set up a logging system to track critical errors. | The application handles errors gracefully without crashing. Logs are being collected. |
+| **D-4.1** | **Production Deployment:** Prepare and deploy the final application to a live production environment on the chosen cloud provider. | The application is live at a public URL and is ready for demos. |
+
+## 4. Development Milestones & Tasks - STAGE 2
+
+### Milestone 5: In-House AI Model Development & Integration
+
+**Goal:** Replace the third-party LLM with a custom, fine-tuned model to reduce operational costs and increase performance on our specific tasks.
+
+| Task ID | Task Description | Acceptance Criteria |
+| --- | --- | --- |
+| **ML-5.1** | **Data Curation & Dataset Creation:** Collect and anonymize high-quality conversations from Stage 1. Create a synthetic "golden dataset" of several thousand ideal Socratic dialogues, grade-specific explanations, and citation examples. | A structured, high-quality instruction dataset (in JSONL format) is created and ready for training. |
+| **ML-5.2** | **Base Model Selection & Fine-Tuning:** Research and select a suitable open-source base model (e.g., Llama 3 8B, Phi-3-small). Set up the cloud GPU environment and perform fine-tuning runs using the curated dataset and efficient techniques like QLoRA. | A fine-tuned model is successfully trained and saved. Training metrics show the model has learned from the dataset. |
+| **ML-5.3** | **Model Evaluation & Iteration:** Develop a rigorous evaluation framework. Conduct qualitative (human review) and quantitative (benchmarks) tests to compare the fine-tuned model against the Stage 1 third-party API. Iterate on the dataset and training process to improve performance. | The custom model demonstrates comparable or superior performance to the third-party API on our core tasks (Socratic method, citation, safety). |
+| **D-5.1** | **GPU Inference Server Deployment:** Provision and configure dedicated cloud servers with high-performance GPUs. Deploy the fine-tuned model using a high-performance inference server like vLLM or TGI. | The custom model is deployed and accessible via a private API endpoint. The endpoint is stable and performs with low latency. |
+| **B-5.1** | **Internal Model Gateway:** Create a new internal backend service that can route AI requests to either the third-party API or the new self-hosted model. Implement a feature flag to control this routing. | The backend can seamlessly switch between AI providers without any change to the core chat logic. |
+| **G-5.1** | **Integration Testing & Rollout:** Conduct end-to-end testing with the new in-house model. Plan and execute a gradual rollout, potentially starting with a small percentage of users. | The application is fully functional with the in-house model. Performance and cost are monitored and meet targets. |
+
+## 5. Project Management & Deliverables
+
+- **Communication:** We will have a mandatory project check-in via video call once per week to discuss progress and address blockers.
+- **Code Management:** All code must be committed to the provided Git repository. We require access to the repository from day one.
+- **Review Environment:** A staging environment must be maintained where we can review and test the latest features.
+- **Final Handover:** The final deliverable for each stage is the complete, documented source code and full administrative access to the cloud infrastructure.
