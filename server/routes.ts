@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { pdfProcessor } from "./services/pdf-processor";
 import { vectorStore } from "./services/vector-store";
 import { geminiService } from "./services/gemini-service";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isTeacher } from "./simpleAuth";
 import { 
   chatRequestSchema, 
   createClassroomRequestSchema, 
@@ -32,33 +32,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are now handled in simpleAuth.ts
 
-  // Helper to check if user is teacher
-  const isTeacher: any = async (req: any, res: any, next: any) => {
-    const userId = req.user.claims.sub;
-    const user = await storage.getUser(userId);
-    if (!user || user.role !== USER_ROLES.TEACHER) {
-      return res.status(403).json({ message: "Teacher access required" });
-    }
-    req.currentUser = user;
-    next();
-  };
+  // isTeacher middleware is now imported from simpleAuth.ts
   // Create classroom (Teachers only)
   app.post("/api/classrooms", isAuthenticated, isTeacher, async (req: any, res) => {
     try {
       const { name, description, gradeLevel, subject } = createClassroomRequestSchema.parse(req.body);
-      const teacherId = req.user.claims.sub;
+      const teacherId = req.user.id;
 
       const classroom = await storage.createClassroom({
         name,
@@ -81,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's classrooms
   app.get("/api/classrooms", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -106,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/classrooms/join", isAuthenticated, async (req: any, res) => {
     try {
       const { inviteCode } = joinClassroomRequestSchema.parse(req.body);
-      const studentId = req.user.claims.sub;
+      const studentId = req.user.id;
 
       const success = await storage.joinClassroomByCode(studentId, inviteCode);
       
@@ -129,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { classroomId } = req.params;
-      const teacherId = req.user.claims.sub;
+      const teacherId = req.user.id;
 
       // Verify teacher owns this classroom
       const classroom = await storage.getClassroom(classroomId);
@@ -180,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/chat", isAuthenticated, async (req: any, res) => {
     try {
       const { sessionId, classroomId, message } = chatRequestSchema.parse(req.body);
-      const studentId = req.user.claims.sub;
+      const studentId = req.user.id;
 
       // Get or create chat session
       let session;
@@ -247,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/classrooms/:classroomId/sessions", isAuthenticated, async (req: any, res) => {
     try {
       const { classroomId } = req.params;
-      const studentId = req.user.claims.sub;
+      const studentId = req.user.id;
       
       const sessions = await storage.getChatSessionsByStudent(studentId, classroomId);
       res.json({ sessions });
@@ -261,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sessions/:sessionId/messages", isAuthenticated, async (req: any, res) => {
     try {
       const { sessionId } = req.params;
-      const studentId = req.user.claims.sub;
+      const studentId = req.user.id;
       
       // Verify session belongs to student
       const session = await storage.getChatSession(sessionId);
