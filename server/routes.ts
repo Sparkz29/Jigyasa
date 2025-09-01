@@ -10,6 +10,7 @@ import {
   createClassroomRequestSchema, 
   joinClassroomRequestSchema,
   uploadDocumentRequestSchema,
+  createUserRequestSchema,
   USER_ROLES
 } from "@shared/schema";
 import multer from "multer";
@@ -33,6 +34,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes are now handled in simpleAuth.ts
+
+  // Create new user route (public for registration)
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = createUserRequestSchema.parse(req.body);
+      const user = await storage.upsertUser(userData);
+      
+      res.json({
+        message: "User created successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          gradeLevel: user.gradeLevel,
+        },
+      });
+    } catch (error) {
+      console.error("Create user error:", error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create user" });
+    }
+  });
 
   // isTeacher middleware is now imported from simpleAuth.ts
   // Create classroom (Teachers only)

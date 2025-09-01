@@ -209,9 +209,18 @@ export const chatRequestSchema = z.object({
   message: z.string().min(1),
 });
 
+export const createUserRequestSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  role: z.enum(['student', 'teacher']),
+  gradeLevel: z.number().min(0).max(12).optional(),
+});
+
 export type CreateClassroomRequest = z.infer<typeof createClassroomRequestSchema>;
 export type JoinClassroomRequest = z.infer<typeof joinClassroomRequestSchema>;
 export type ChatRequest = z.infer<typeof chatRequestSchema>;
+export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
 
 // Grade level utilities
 export const GRADE_LEVELS = {

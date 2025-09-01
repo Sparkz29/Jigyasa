@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { UserCircle, Award, X } from "lucide-react";
+import { UserCircle, Award, X, Plus, ArrowLeft } from "lucide-react";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -13,13 +20,26 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [userType, setUserType] = useState<'student' | 'teacher'>('student');
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [userType, setUserType] = useState<"student" | "teacher">("student");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    gradeLevel: "",
+  });
   const { toast } = useToast();
 
   const loginMutation = useMutation({
-    mutationFn: async ({ userId, type }: { userId: string; type: 'student' | 'teacher' }) => {
-      return await apiRequest(`/api/login/${type}`, 'POST', { userId });
+    mutationFn: async ({
+      userId,
+      type,
+    }: {
+      userId: string;
+      type: "student" | "teacher";
+    }) => {
+      return await apiRequest(`/api/login/${type}`, "POST", { userId });
     },
     onSuccess: () => {
       window.location.reload();
@@ -28,6 +48,29 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       toast({
         title: "Login Failed",
         description: error instanceof Error ? error.message : "Failed to login",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      return await apiRequest("/api/users", "POST", userData);
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Account Created",
+        description: `Welcome ${data.user.firstName}! You can now sign in.`,
+      });
+      setShowCreateForm(false);
+      setNewUser({ email: "", firstName: "", lastName: "", gradeLevel: "" });
+      // Automatically log in the new user
+      loginMutation.mutate({ userId: data.user.id, type: userType });
+    },
+    onError: (error) => {
+      toast({
+        title: "Account Creation Failed",
+        description: error instanceof Error ? error.message : "Failed to create account",
         variant: "destructive",
       });
     },
@@ -45,18 +88,45 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     loginMutation.mutate({ userId: selectedUserId, type: userType });
   };
 
-  // Sample user data for selection
+  const handleCreateUser = () => {
+    if (!newUser.email || !newUser.firstName || !newUser.lastName) {
+      toast({
+        title: "Fill Required Fields",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (userType === "student" && !newUser.gradeLevel) {
+      toast({
+        title: "Grade Level Required",
+        description: "Please select a grade level for students",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const userData = {
+      email: newUser.email,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      role: userType,
+      gradeLevel: userType === "student" ? parseInt(newUser.gradeLevel) : undefined,
+    };
+
+    createUserMutation.mutate(userData);
+  };
+
+  // Actual user data from database
   const sampleUsers = {
     student: [
-      { id: 'student1', name: 'Emma Davis', grade: 5 },
-      { id: 'student2', name: 'Alex Wilson', grade: 8 },
-      { id: 'student3', name: 'Maya Patel', grade: 10 },
-      { id: 'student4', name: 'Noah Thompson', grade: 6 },
-      { id: 'student5', name: 'Zoe Martinez', grade: 9 },
+      { id: "0914b99d-8b87-4062-be90-caf812cf2aab", name: "Alex Johnson", grade: 5 },
+      { id: "a7aa4231-0caa-45ef-a949-df02d4933b67", name: "Emma Davis", grade: 8 },
     ],
     teacher: [
-      { id: 'teacher1', name: 'Sarah Johnson', subject: 'Mathematics' },
-      { id: 'teacher2', name: 'Michael Chen', subject: 'Science' },
+      { id: "7a6f6452-9812-4536-a269-7b2b66cda2e7", name: "Sarah Miller", subject: "Science" },
+      { id: "ca382934-f328-491d-af87-35fda0e3d35d", name: "John Wilson", subject: "Mathematics" },
     ],
   };
 
@@ -66,7 +136,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">Sign In to JIGYASA.AI</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Sign In to JIGYASA.AI
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -75,7 +147,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <div className="p-6">
           <div className="space-y-4">
             <div>
@@ -84,10 +156,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <Button
-                  variant={userType === 'student' ? 'default' : 'outline'}
+                  variant={userType === "student" ? "default" : "outline"}
                   onClick={() => {
-                    setUserType('student');
-                    setSelectedUserId('');
+                    setUserType("student");
+                    setSelectedUserId("");
                   }}
                   className="flex items-center justify-center space-x-2 h-12"
                   data-testid="button-select-student"
@@ -96,10 +168,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <span>Student</span>
                 </Button>
                 <Button
-                  variant={userType === 'teacher' ? 'default' : 'outline'}
+                  variant={userType === "teacher" ? "default" : "outline"}
                   onClick={() => {
-                    setUserType('teacher');
-                    setSelectedUserId('');
+                    setUserType("teacher");
+                    setSelectedUserId("");
                   }}
                   className="flex items-center justify-center space-x-2 h-12"
                   data-testid="button-select-teacher"
@@ -112,11 +184,13 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Select {userType === 'student' ? 'Student' : 'Teacher'} Account
+                Select {userType === "student" ? "Student" : "Teacher"} Account
               </label>
               <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                 <SelectTrigger data-testid="select-user">
-                  <SelectValue placeholder={`Choose a ${userType} account...`} />
+                  <SelectValue
+                    placeholder={`Choose a ${userType} account...`}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {sampleUsers[userType].map((user) => (
@@ -124,7 +198,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       <div className="flex items-center space-x-2">
                         <span>{user.name}</span>
                         <span className="text-sm text-gray-500">
-                          {userType === 'student' ? `Grade ${(user as any).grade}` : (user as any).subject}
+                          {userType === "student"
+                            ? `Grade ${(user as any).grade}`
+                            : (user as any).subject}
                         </span>
                       </div>
                     </SelectItem>
@@ -133,21 +209,112 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </Select>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>Demo Users:</strong> These are sample accounts for testing. 
-                {userType === 'student' ? ' Students can join classrooms and chat with the AI tutor.' : ' Teachers can create classrooms and upload curriculum materials.'}
-              </p>
-            </div>
+            {!showCreateForm && (
+              <>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Demo Users:</strong> These are real accounts in the system.
+                    {userType === "student"
+                      ? " Students can join classrooms and chat with the AI tutor."
+                      : " Teachers can create classrooms and upload curriculum materials."}
+                  </p>
+                </div>
 
-            <Button
-              onClick={handleLogin}
-              disabled={!selectedUserId || loginMutation.isPending}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              data-testid="button-login"
-            >
-              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
-            </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleLogin}
+                    disabled={!selectedUserId || loginMutation.isPending}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    data-testid="button-login"
+                  >
+                    {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCreateForm(true)}
+                    className="flex items-center space-x-2"
+                    data-testid="button-create-new"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create New</span>
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {showCreateForm && (
+              <>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowCreateForm(false)}
+                      className="p-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <h3 className="text-lg font-medium">Create New {userType === "student" ? "Student" : "Teacher"}</h3>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Email</label>
+                    <Input
+                      type="email"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">First Name</label>
+                      <Input
+                        value={newUser.firstName}
+                        onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                        placeholder="First name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">Last Name</label>
+                      <Input
+                        value={newUser.lastName}
+                        onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                        placeholder="Last name"
+                      />
+                    </div>
+                  </div>
+                  
+                  {userType === "student" && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">Grade Level</label>
+                      <Select value={newUser.gradeLevel} onValueChange={(value) => setNewUser({ ...newUser, gradeLevel: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select grade level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 13 }, (_, i) => (
+                            <SelectItem key={i} value={i.toString()}>
+                              {i === 0 ? "Kindergarten" : `Grade ${i}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  onClick={handleCreateUser}
+                  disabled={createUserMutation.isPending}
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  data-testid="button-create-account"
+                >
+                  {createUserMutation.isPending ? "Creating Account..." : "Create Account & Sign In"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
