@@ -213,14 +213,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(studentId);
       const gradeLevel = user?.gradeLevel || 8;
 
+      // Get existing conversation history for context
+      const existingMessages = await storage.getChatMessages(session.id);
+      const conversationHistory = existingMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
       // Create grade-adaptive prompt
       const gradePrompt = `You are JIGYASA.AI, an AI tutor for grade ${gradeLevel} students. Use the Socratic method - ask leading questions to guide learning rather than giving direct answers. Adapt your language complexity to grade ${gradeLevel} level. Reference the provided curriculum materials and always cite your sources.`;
 
-      // Generate response using Gemini with educational context
+      // Generate response using Gemini with educational context and conversation history
       const response = await geminiService.chat(
         `${gradePrompt}\n\nStudent question: ${message}`, 
         context, 
-        []
+        conversationHistory
       );
 
       // Store messages
