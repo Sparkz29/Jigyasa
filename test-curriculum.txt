@@ -1,0 +1,37 @@
+# Sample Biology Curriculum
+
+## Chapter 1: Introduction to Living Things
+
+All living things share certain characteristics:
+- They are made of cells
+- They reproduce
+- They grow and develop  
+- They respond to their environment
+- They maintain homeostasis
+- They use energy
+
+### What is a Cell?
+A cell is the basic unit of life. All living things are made of one or more cells.
+
+### Types of Cells
+1. Prokaryotic cells - do not have a nucleus
+2. Eukaryotic cells - have a nucleus
+
+### Plant vs Animal Cells
+Plant cells have:
+- Cell wall
+- Chloroplasts
+- Large vacuole
+
+Animal cells have:
+- Smaller vacuoles
+- Centrosomes
+
+## Chapter 2: Photosynthesis
+
+Photosynthesis is the process by which plants make their own food using sunlight, carbon dioxide, and water.
+
+The equation for photosynthesis is:
+6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+This process happens in the chloroplasts of plant cells.

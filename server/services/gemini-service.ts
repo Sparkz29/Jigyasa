@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { type QuizQuestion } from '@shared/schema';
+// Remove unused QuizQuestion import since it's not defined in schema
 
 // DON'T DELETE THIS COMMENT
 // Follow these instructions when using this blueprint:
@@ -40,7 +40,7 @@ Assistant:`;
     }
   }
 
-  async generateQuiz(context: string[], topic?: string): Promise<QuizQuestion[]> {
+  async generateQuiz(context: string[], topic?: string): Promise<any[]> {
     const contextString = context.join('\n\n');
     const topicPrompt = topic ? ` on the topic of "${topic}"` : '';
     
