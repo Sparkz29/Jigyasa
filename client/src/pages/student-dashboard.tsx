@@ -135,6 +135,26 @@ export default function StudentDashboard() {
     }
   };
 
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('/api/logout', 'POST');
+    },
+    onSuccess: () => {
+      window.location.href = '/';
+    },
+    onError: (error) => {
+      toast({
+        title: "Logout Failed",
+        description: error instanceof Error ? error.message : "Failed to logout",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   const classrooms: Classroom[] = (classroomsData as any)?.classrooms || [];
   const sessions = (sessionsData as any)?.sessions || [];
 
@@ -157,7 +177,8 @@ export default function StudentDashboard() {
             </div>
             <Button
               variant="outline"
-              onClick={() => window.location.href = '/api/logout'}
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4 mr-2" />
