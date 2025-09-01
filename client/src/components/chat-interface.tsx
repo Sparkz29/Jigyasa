@@ -67,7 +67,7 @@ export function ChatInterface({ documentId, documentInfo, onClearDocument }: Cha
 
   const chatMutation = useMutation({
     mutationFn: async (data: { query: string; conversationHistory?: Array<{ role: string; content: string }> }) => {
-      const response = await apiRequest('POST', '/api/chat', {
+      const response = await apiRequest('/api/chat', 'POST', {
         query: data.query,
         documentId,
         conversationHistory: data.conversationHistory,
@@ -97,7 +97,7 @@ export function ChatInterface({ documentId, documentInfo, onClearDocument }: Cha
 
   const quizMutation = useMutation({
     mutationFn: async (topic?: string) => {
-      const response = await apiRequest('POST', '/api/quiz', {
+      const response = await apiRequest('/api/quiz', 'POST', {
         documentId,
         topic,
       });
@@ -126,7 +126,7 @@ export function ChatInterface({ documentId, documentInfo, onClearDocument }: Cha
 
   const hintMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest('POST', '/api/hint', {
+      const response = await apiRequest('/api/hint', 'POST', {
         question,
         documentId,
       });
@@ -154,7 +154,7 @@ export function ChatInterface({ documentId, documentInfo, onClearDocument }: Cha
 
   const answerMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest('POST', '/api/answer', {
+      const response = await apiRequest('/api/answer', 'POST', {
         question,
         documentId,
       });
