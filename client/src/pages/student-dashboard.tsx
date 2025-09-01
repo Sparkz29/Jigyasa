@@ -357,7 +357,7 @@ export default function StudentDashboard() {
                             </div>
                           )}
                           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          {message.role === 'assistant' && message.citations && (
+                          {message.role === 'assistant' && message.citations != null && (
                             <div className="mt-2 pt-2 border-t border-gray-200">
                               <p className="text-xs text-gray-600">
                                 📚 Sources referenced in this response
