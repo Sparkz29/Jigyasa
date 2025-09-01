@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LoginModal } from "@/components/LoginModal";
+import { useState } from "react";
 import { 
   BookOpen, 
   Users, 
@@ -16,6 +18,8 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const [showLogin, setShowLogin] = useState(false);
+  
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -62,14 +66,15 @@ export default function Landing() {
               >
                 Contact
               </button>
-              <Button variant="outline" onClick={() => window.location.href = '/api/login'}>
+              <Button variant="outline" onClick={() => setShowLogin(true)} data-testid="button-sign-in">
                 Sign In
               </Button>
               <Button 
-                onClick={() => scrollToSection('demo')}
+                onClick={() => setShowLogin(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                data-testid="button-get-started"
               >
-                Try Demo
+                Get Started
               </Button>
             </nav>
           </div>
@@ -99,7 +104,8 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => setShowLogin(true)}
+                data-testid="button-get-started-free"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -392,7 +398,8 @@ export default function Landing() {
             <Button 
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-4"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setShowLogin(true)}
+              data-testid="button-get-started-now"
             >
               Get Started Now
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -427,6 +434,8 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      
+      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </div>
   );
 }
