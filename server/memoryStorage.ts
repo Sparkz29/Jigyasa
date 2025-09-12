@@ -104,9 +104,9 @@ export class MemoryStorage implements IStorage {
   }
 
   private initializeData() {
-    // Create sample students
+    // Create sample students (matching frontend hardcoded IDs)
     const student1: User = {
-      id: randomUUID(),
+      id: "0914b99d-8b87-4062-be90-caf812cf2aab",
       email: "alex.johnson@student.edu",
       firstName: "Alex",
       lastName: "Johnson",
@@ -117,7 +117,7 @@ export class MemoryStorage implements IStorage {
     };
 
     const student2: User = {
-      id: randomUUID(),
+      id: "a7aa4231-0caa-45ef-a949-df02d4933b67",
       email: "emma.davis@student.edu",
       firstName: "Emma",
       lastName: "Davis",
@@ -127,9 +127,9 @@ export class MemoryStorage implements IStorage {
       updatedAt: new Date(),
     };
 
-    // Create sample teachers
+    // Create sample teachers (matching frontend hardcoded IDs)
     const teacher1: User = {
-      id: randomUUID(),
+      id: "7a6f6452-9812-4536-a269-7b2b66cda2e7",
       email: "sarah.miller@school.edu",
       firstName: "Sarah",
       lastName: "Miller",
@@ -139,7 +139,7 @@ export class MemoryStorage implements IStorage {
     };
 
     const teacher2: User = {
-      id: randomUUID(),
+      id: "ca382934-f328-491d-af87-35fda0e3d35d",
       email: "john.wilson@school.edu",
       firstName: "John",
       lastName: "Wilson",
