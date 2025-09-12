@@ -1,18 +1,37 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { pdfProcessor } from "./services/pdf-processor";
 import { vectorStore } from "./services/vector-store";
 import { geminiService } from "./services/gemini-service";
-import { setupAuth, isAuthenticated, isTeacher } from "./simpleAuth";
-import { 
-  chatRequestSchema, 
-  createClassroomRequestSchema, 
-  joinClassroomRequestSchema,
-  uploadDocumentRequestSchema,
-  createUserRequestSchema,
-  USER_ROLES
-} from "@shared/schema";
+import { setupAuth, isAuthenticated, isTeacher, isStudent, storage, USER_ROLES } from "./simpleAuth";
+import { z } from "zod";
+
+// Simple request schemas without database dependencies
+const chatRequestSchema = z.object({
+  sessionId: z.string().optional(),
+  classroomId: z.string(),
+  message: z.string(),
+});
+
+const createClassroomRequestSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  gradeLevel: z.number(),
+  subject: z.string().optional(),
+});
+
+const joinClassroomRequestSchema = z.object({
+  inviteCode: z.string(),
+});
+
+const createUserRequestSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  role: z.enum(['student', 'teacher'] as const),
+  gradeLevel: z.number().min(0).max(12).optional(),
+});
+
 import multer from "multer";
 
 const upload = multer({
@@ -108,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Join classroom by invite code (Students only)
-  app.post("/api/classrooms/join", isAuthenticated, async (req: any, res) => {
+  app.post("/api/classrooms/join", isAuthenticated, isStudent, async (req: any, res) => {
     try {
       const { inviteCode } = joinClassroomRequestSchema.parse(req.body);
       const studentId = req.user.id;

@@ -1,27 +1,39 @@
 import { Express, RequestHandler } from "express";
 import session from "express-session";
-import connectPg from "connect-pg-simple";
-import { storage } from "./storage";
-import { USER_ROLES } from "@shared/schema";
+import { MemoryStorage } from "./memoryStorage";
+
+// Create global memory storage instance
+export const storage = new MemoryStorage();
+
+// User roles constants
+export const USER_ROLES = {
+  STUDENT: "student",
+  TEACHER: "teacher",
+  ADMIN: "admin"
+} as const;
+
+declare module "express-session" {
+  interface SessionData {
+    user?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      gradeLevel?: number;
+    };
+  }
+}
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
   return session({
     secret: process.env.SESSION_SECRET || "jigyasa-ai-secret-key-development",
-    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS
-      maxAge: sessionTtl,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
   });
 }
@@ -150,6 +162,14 @@ export const isAuthenticated: RequestHandler = (req: any, res, next) => {
 export const isTeacher: RequestHandler = (req: any, res, next) => {
   if (!req.user || req.user.role !== USER_ROLES.TEACHER) {
     return res.status(403).json({ message: "Teacher access required" });
+  }
+  next();
+};
+
+// Middleware to check if user is a student
+export const isStudent: RequestHandler = (req: any, res, next) => {
+  if (!req.user || req.user.role !== USER_ROLES.STUDENT) {
+    return res.status(403).json({ message: "Student access required" });
   }
   next();
 };
